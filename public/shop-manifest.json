@@ -1,0 +1,15 @@
+{
+  "name": "HSFOODS — Fresh Fruits",
+  "short_name": "HSFOODS",
+  "description": "Order fresh fruits & groceries, delivered in minutes",
+  "start_url": "/shop.html?app=1",
+  "scope": "/shop",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F3FBF6",
+  "theme_color": "#1B8B4B",
+  "icons": [
+    { "src": "/icons/shop-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/shop-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

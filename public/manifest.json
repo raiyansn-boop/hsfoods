@@ -1,0 +1,15 @@
+{
+  "name": "HSFOODS Manager",
+  "short_name": "HSFOODS",
+  "description": "HSFOODS WhatsApp sales management dashboard",
+  "start_url": "/?app=1",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#F4F6F9",
+  "theme_color": "#0A1628",
+  "icons": [
+    { "src": "/icons/mgmt-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/mgmt-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

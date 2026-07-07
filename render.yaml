@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: hsfoods
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      # Optional — set these in the Render dashboard, not here:
+      - key: ANTHROPIC_API_KEY   # enables the AI assistant (leave blank to skip)
+        sync: false
+      - key: LOYALTY_RATE_PCT    # default loyalty cashback %
+        value: "2"

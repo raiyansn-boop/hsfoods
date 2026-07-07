@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <title>HSFOODS — Fresh Fruits</title>
+  <meta name="theme-color" content="#1B8B4B" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="manifest" href="/shop-manifest.json" />
+  <link rel="apple-touch-icon" href="/icons/shop-192.png" />
+  <link rel="icon" href="/icons/shop-192.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shop.css" />
+</head>
+<body>
+
+  <!-- ONBOARDING (phone gate) -->
+  <div class="onboard" id="onboard">
+    <div class="onboard-card">
+      <div class="onboard-logo">🍃</div>
+      <h1>HS<span>FOODS</span></h1>
+      <p>Fresh fruits & groceries, delivered in minutes ⚡</p>
+      <input id="obPhone" type="tel" inputmode="numeric" placeholder="Your WhatsApp number" />
+      <input id="obName" type="text" placeholder="Your name (optional)" />
+      <input id="obRef" type="text" placeholder="Referral code (optional)" />
+      <button class="btn-primary" id="obStart">Start shopping →</button>
+      <p class="onboard-fine">No password needed. We use your number to save your cart, wallet & orders.</p>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div class="app" id="app" hidden>
+    <header class="app-header">
+      <div class="app-brand">🍃 HS<b>FOODS</b></div>
+      <button class="wallet-chip" id="walletChip">👛 ₹0</button>
+    </header>
+
+    <!-- SHOP -->
+    <main class="screen active" id="screen-shop">
+      <div class="cat-chips" id="shopCats"></div>
+      <div class="prod-grid" id="prodGrid"></div>
+    </main>
+
+    <!-- CART -->
+    <main class="screen" id="screen-cart">
+      <h2 class="screen-title">🧺 Your basket</h2>
+      <div id="cartItems"></div>
+      <div class="checkout" id="checkoutBox" hidden>
+        <label class="wallet-row" id="walletRow" hidden>
+          <span>👛 Use wallet credit (<b id="walletAvail">₹0</b>)</span>
+          <input type="checkbox" id="useWallet" />
+        </label>
+        <input id="ckAddress" placeholder="Delivery address (house, street, area)" />
+        <div class="pay-modes">
+          <label class="pay-opt"><input type="radio" name="pay" value="cod" checked /> 💵 Cash on delivery</label>
+          <label class="pay-opt"><input type="radio" name="pay" value="upi" /> 📲 UPI</label>
+        </div>
+        <div class="cart-total"><span>Total</span><span id="cartTotal">₹0</span></div>
+        <button class="btn-primary" id="placeOrder">Place order</button>
+      </div>
+    </main>
+
+    <!-- ORDERS -->
+    <main class="screen" id="screen-orders">
+      <h2 class="screen-title">📦 My orders</h2>
+      <div id="orderList"></div>
+    </main>
+
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav">
+      <button class="nav-btn active" data-screen="shop"><span>🛍️</span>Shop</button>
+      <button class="nav-btn" data-screen="cart"><span>🧺</span>Cart<span class="nav-badge" id="cartBadge" hidden>0</span></button>
+      <button class="nav-btn" data-screen="orders"><span>📦</span>Orders</button>
+    </nav>
+  </div>
+
+  <!-- ORDER CONFIRMATION -->
+  <div class="confirm" id="confirm" hidden>
+    <div class="confirm-card" id="confirmCard"></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="shop.js"></script>
+</body>
+</html>

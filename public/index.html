@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HSFOODS — WhatsApp Sales Management</title>
+  <meta name="theme-color" content="#0A1628" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" href="/icons/mgmt-192.png" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍃</text></svg>" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <span style="font-size:22px">🍃</span>
+      <div>
+        <div class="sb-logo-main">HS<span>FOODS</span></div>
+        <div class="sb-wa-badge">WhatsApp Commerce</div>
+      </div>
+    </div>
+
+    <div class="sb-sec">Overview</div>
+    <button class="sb-item active" data-view="dashboard"><span class="si">📊</span> Dashboard</button>
+    <button class="sb-item" data-view="chats"><span class="si">⚡</span> Live Messages <span class="cnt" id="navChats" hidden></span></button>
+    <button class="sb-item" data-view="analytics"><span class="si">📈</span> Analytics</button>
+    <button class="sb-item" data-view="bot"><span class="si">🤖</span> WhatsApp Bot</button>
+
+    <div class="sb-sec">WhatsApp</div>
+    <button class="sb-item" data-view="templates"><span class="si">📝</span> Message Templates</button>
+    <button class="sb-item" data-view="catalog"><span class="si">🛍️</span> WA Catalog</button>
+
+    <div class="sb-sec">Catalogue &amp; Orders</div>
+    <button class="sb-item" data-view="products"><span class="si">🛒</span> Products</button>
+    <button class="sb-item" data-view="orders"><span class="si">📦</span> Orders <span class="cnt g" id="navOrders" hidden></span></button>
+    <button class="sb-item" data-view="scan"><span class="si">🔎</span> Scan Lookup</button>
+
+    <div class="sb-sec">Customers</div>
+    <button class="sb-item" data-view="customers"><span class="si">👥</span> Customers</button>
+    <button class="sb-item" data-view="referrals"><span class="si">🎁</span> Referrals &amp; Wallet</button>
+
+    <div class="sb-footer">
+      <div class="sb-user">
+        <div class="sb-av">A</div>
+        <div><div class="sb-uname">Admin</div><div class="sb-urole">HSFOODS Store</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title">
+        <span class="live-dot"></span>
+        <span id="topTitle">WhatsApp Dashboard</span>
+      </div>
+      <div class="tb-search">
+        <span style="color:var(--muted)">🔍</span>
+        <input type="text" placeholder="Search orders, customers…" id="globalSearch" autocomplete="off" />
+      </div>
+      <button class="tb-btn" id="refreshBtn" title="Refresh">↻</button>
+    </div>
+
+    <div class="content">
+    <!-- DASHBOARD -->
+    <section class="view active" id="view-dashboard">
+      <div class="kpis" id="kpis"></div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head"><h3>📊 Revenue — last 7 days</h3></div>
+          <div class="bars" id="revenueBars"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>🏆 Top sellers</h3></div>
+          <ul class="ranklist" id="topProducts"></ul>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head"><h3>⚠️ Low stock</h3></div>
+          <ul class="ranklist" id="lowStock"></ul>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>💳 Payment setup</h3></div>
+          <form id="payForm" class="pay-form">
+            <label class="pay-check"><input type="checkbox" id="payCod" /> 💵 Cash on delivery</label>
+            <label class="pay-check"><input type="checkbox" id="payUpi" /> 📲 UPI</label>
+            <input id="payVpa" placeholder="UPI ID, e.g. hsfoods@okhdfcbank" />
+            <input id="payName" placeholder="Payee name (shown in UPI apps)" />
+            <button class="btn btn-wa" type="submit">Save payment setup</button>
+            <p class="muted" id="payHint"></p>
+          </form>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>📲 Order channels</h3></div>
+        <div class="bars" id="channels"></div>
+      </div>
+    </section>
+
+    <!-- PRODUCTS -->
+    <section class="view" id="view-products">
+      <div class="card">
+        <div class="card-head">
+          <h3>🏷️ Categories</h3>
+          <form id="catForm" class="cat-add">
+            <input id="catName" placeholder="New category…" autocomplete="off" />
+            <button class="btn btn-wa" type="submit">+ Add</button>
+          </form>
+        </div>
+        <div class="cat-chips" id="catChips"></div>
+        <p class="muted">Deactivating a category hides all its products from the WhatsApp menu. Categories with products can't be deleted.</p>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <h3>🛒 Catalogue</h3>
+          <button class="btn btn-wa" id="addProductBtn">+ Add product</button>
+        </div>
+        <div class="tbl-wrap" style="border:none"><table class="data" id="productsTable"></table></div>
+      </div>
+    </section>
+
+    <!-- ORDERS -->
+    <section class="view" id="view-orders">
+      <div class="card">
+        <div class="card-head"><h3>📦 Orders</h3></div>
+        <div class="tbl-wrap" style="border:none"><table class="data" id="ordersTable"></table></div>
+      </div>
+    </section>
+
+    <!-- CUSTOMERS -->
+    <section class="view" id="view-customers">
+      <div class="card">
+        <div class="card-head"><h3>👥 Customers</h3></div>
+        <div class="tbl-wrap" style="border:none"><table class="data" id="customersTable"></table></div>
+      </div>
+    </section>
+
+    <!-- REFERRALS -->
+    <section class="view" id="view-referrals">
+      <div class="kpis" id="refKpis"></div>
+      <div class="card">
+        <div class="card-head"><h3>🤖 AI Assistant <span class="muted" style="font-weight:400">— ask about liability, wallets &amp; sales</span></h3></div>
+        <div class="suggestions" id="aiSuggestions"></div>
+        <form id="aiForm" class="chat-input" style="border:none;padding:0;background:none">
+          <input id="aiText" placeholder="e.g. What's our outstanding referral liability?" autocomplete="off" />
+          <button class="btn btn-wa" type="submit">Ask</button>
+        </form>
+        <div id="aiAnswer" class="ai-answer muted">Ask a question about the referral program or sales.</div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <h3>🎁 Referrers &amp; wallets</h3>
+          <button class="btn btn-outline btn-sm" id="processBtn" title="Approve rewards past delivery + return window">⚙ Process approvals</button>
+        </div>
+        <p class="muted" id="refRules"></p>
+        <div class="tbl-wrap" style="border:none"><table class="data" id="referrersTable"></table></div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <h3>📒 Referral ledger</h3>
+          <select id="ledgerFilter" class="form-input" style="width:auto">
+            <option value="">All states</option>
+            <option value="provisional">Provisional</option>
+            <option value="approved">Approved</option>
+            <option value="review">Review</option>
+            <option value="reversed">Reversed</option>
+          </select>
+        </div>
+        <div class="tbl-wrap" style="border:none"><table class="data" id="ledgerTable"></table></div>
+      </div>
+    </section>
+
+    <!-- CHATS (admin live messages) -->
+    <section class="view" id="view-chats">
+      <div class="card">
+        <div class="card-head">
+          <h3>📣 Broadcast</h3>
+          <span class="muted" id="bcReach"></span>
+        </div>
+        <form id="bcForm" class="bc-form">
+          <textarea id="bcText" rows="2" placeholder="Write an offer… e.g. 🥭 Weekend special: 20% off Alphonso Mangoes — reply 'menu' to order!"></textarea>
+          <div class="bc-controls">
+            <select id="bcAudience" class="form-input" style="width:auto">
+              <option value="all">Everyone</option>
+              <option value="ordered">Has ordered before</option>
+              <option value="wallet">Has wallet balance</option>
+            </select>
+            <button class="btn btn-wa" type="submit">Send broadcast</button>
+          </div>
+        </form>
+        <ul class="ranklist" id="bcHistory"></ul>
+      </div>
+      <div class="card chats-card">
+        <div class="card-head">
+          <h3><span class="live-dot"></span> &nbsp;Live Messages</h3>
+          <span class="muted" id="chatsCount"></span>
+        </div>
+        <div class="chats-layout">
+          <div class="conv-list" id="convList"></div>
+          <div class="chat-panel">
+            <div class="chat-panel-head" id="chatHead">Select a conversation</div>
+            <div class="chat admin-chat" id="adminChat"></div>
+            <form class="chat-input" id="adminChatForm">
+              <button class="btn btn-outline btn-sm" type="button" id="tplPickBtn" disabled title="Insert a template">📝</button>
+              <input id="adminChatText" placeholder="Reply as HSFOODS…" autocomplete="off" disabled />
+              <button class="wa-send" type="submit" disabled id="adminChatSend">➤</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCAN LOOKUP -->
+    <section class="view" id="view-scan">
+      <div class="card scan-card">
+        <div class="card-head"><h3>🔎 Scan lookup</h3></div>
+        <p class="muted">Scan a delivery-slip barcode with a USB scanner (it types the code + Enter), type an order code, or use the camera.</p>
+        <form id="scanForm" class="scan-input-row">
+          <input id="scanInput" placeholder="HS123456" autocomplete="off" spellcheck="false" />
+          <button class="btn btn-wa" type="submit">Look up</button>
+          <button class="btn btn-outline" type="button" id="scanCamBtn">📷 Camera</button>
+        </form>
+        <video id="scanVideo" playsinline muted></video>
+        <div id="scanResult"></div>
+      </div>
+    </section>
+
+    <!-- MESSAGE TEMPLATES -->
+    <section class="view" id="view-templates">
+      <div class="card-head" style="margin-bottom:16px">
+        <p class="muted">Reusable canned replies. Variables <code>{name}</code> <code>{phone}</code> <code>{store}</code> are filled in when you send from the inbox.</p>
+        <button class="btn btn-wa" id="addTemplateBtn">+ New Template</button>
+      </div>
+      <div class="tpl-grid" id="tplGrid"></div>
+    </section>
+
+    <!-- WA CATALOG -->
+    <section class="view" id="view-catalog">
+      <div class="card-head" style="margin-bottom:16px">
+        <p class="muted">Your shoppable catalogue as customers see it. Inactive categories are hidden from the WhatsApp menu.</p>
+        <button class="btn btn-wa" id="shareCatalogBtn">📤 Share to customers</button>
+      </div>
+      <div id="catalogGrid"></div>
+    </section>
+
+    <!-- ANALYTICS -->
+    <section class="view" id="view-analytics">
+      <div class="kpis" id="anKpis"></div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head"><h3>📊 Revenue &amp; orders — last 7 days</h3></div>
+          <div style="position:relative;height:260px"><canvas id="chRevenue"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>🤖 Order channels</h3></div>
+          <div style="position:relative;height:260px"><canvas id="chChannels"></canvas></div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head"><h3>🏆 Top sellers (by qty)</h3></div>
+          <div style="position:relative;height:260px"><canvas id="chTop"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>💳 Payment mix</h3></div>
+          <div style="position:relative;height:260px"><canvas id="chPay"></canvas></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>📦 Order status pipeline</h3></div>
+        <div style="position:relative;height:220px"><canvas id="chStatus"></canvas></div>
+      </div>
+    </section>
+
+    <!-- WHATSAPP BOT -->
+    <section class="view" id="view-bot">
+      <div class="card chat-card">
+        <div class="card-head"><h3>📱 WhatsApp Bot Simulator</h3></div>
+        <p class="muted">Chat exactly as a customer would on WhatsApp. Try: <code>menu</code>, <code>2 A, 1 B</code>, <code>confirm</code>.</p>
+        <div class="wa-chat-wrap">
+          <div class="wa-chat-header">
+            <div class="av">🍃</div>
+            <div><div class="name">HSFOODS Bot</div><div class="status"><span class="live-dot" style="width:6px;height:6px;display:inline-block"></span> online</div></div>
+          </div>
+          <div class="chat" id="chat"></div>
+          <form class="wa-chat-input" id="chatForm">
+            <span style="font-size:20px">😊</span>
+            <input id="chatText" placeholder="Type a message…" autocomplete="off" />
+            <button class="wa-send" type="submit">➤</button>
+          </form>
+        </div>
+      </div>
+    </section>
+    </div><!-- /content -->
+  </div><!-- /main -->
+
+  <!-- ADD PRODUCT DIALOG -->
+  <dialog id="productDialog">
+    <form id="productForm" method="dialog" class="dlg-form">
+      <h3>Add product</h3>
+      <div class="dlg-grid">
+        <label>Name <input id="pfName" required placeholder="e.g. Fresh Spinach" /></label>
+        <label>Emoji <input id="pfEmoji" value="🍎" maxlength="4" /></label>
+        <label>Category
+          <input id="pfCategory" list="categoryList" required placeholder="e.g. Vegetables" />
+          <datalist id="categoryList"></datalist>
+        </label>
+        <label>Unit
+          <select id="pfUnit">
+            <option>kg</option><option>dozen</option><option>box</option>
+            <option>pc</option><option>litre</option><option>pack</option><option>bunch</option>
+          </select>
+        </label>
+        <label>Price (₹) <input id="pfPrice" type="number" min="0" step="0.5" required /></label>
+        <label>Cost (₹) <input id="pfCost" type="number" min="0" step="0.5" placeholder="optional" /></label>
+        <label>Stock <input id="pfStock" type="number" min="0" value="50" /></label>
+      </div>
+      <div class="dlg-actions">
+        <button type="button" class="btn btn-outline" id="pfCancel">Cancel</button>
+        <button type="submit" class="btn btn-wa">Add product</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- TEMPLATE EDITOR DIALOG -->
+  <dialog id="templateDialog">
+    <form id="templateForm" method="dialog" class="dlg-form">
+      <h3 id="tplDlgTitle">New template</h3>
+      <input type="hidden" id="tfId" />
+      <div class="dlg-grid">
+        <label>Name <input id="tfName" required placeholder="e.g. Order Confirmation" /></label>
+        <label>Category <input id="tfCategory" placeholder="e.g. Status update" /></label>
+      </div>
+      <label class="tpl-body-label">Message
+        <textarea id="tfBody" rows="6" required placeholder="Hi {name}! 🍃 ..."></textarea>
+        <span class="hint">Variables: <code>{name}</code> <code>{phone}</code> <code>{store}</code></span>
+      </label>
+      <div class="dlg-actions">
+        <button type="button" class="btn btn-outline" id="tfCancel">Cancel</button>
+        <button type="submit" class="btn btn-wa">Save template</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- TEMPLATE PICKER DIALOG -->
+  <dialog id="tplPickerDialog">
+    <div class="dlg-form">
+      <div class="card-head"><h3>Insert a template</h3><button type="button" class="chip-act" id="tplPickerClose">✕</button></div>
+      <div id="tplPickerList" class="tpl-picker-list"></div>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast"></div>
+  <script src="app.js"></script>
+</body>
+</html>
