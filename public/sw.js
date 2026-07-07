@@ -1,5 +1,5 @@
 // HSFOODS service worker — offline app shell for the PWAs.
-const CACHE = 'hsfoods-v2';
+const CACHE = 'hsfoods-v3';
 const SHELL = [
   '/', '/index.html', '/styles.css', '/app.js',
   '/shop.html', '/shop.css', '/shop.js',

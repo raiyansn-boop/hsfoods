@@ -1,5 +1,11 @@
-// Register the PWA service worker (installable management app)
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
+// Register the PWA service worker (installable management app) + auto-reload on update
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (reloaded) return; reloaded = true; location.reload();
+  });
+}
 
 const $ = (sel) => document.querySelector(sel);
 const api = async (path, opts) => {

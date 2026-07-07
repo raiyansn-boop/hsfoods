@@ -35,20 +35,25 @@ $('#obStart').addEventListener('click', () => {
 
 async function boot() {
   if (!store.phone) { $('#onboard').hidden = false; $('#app').hidden = true; return; }
+  // show the app shell first so onboarding can never get "stuck" on errors
   $('#onboard').hidden = true; $('#app').hidden = false;
-  const [menu, ctx] = await Promise.all([
-    api('/shop/menu'),
-    api('/shop/context?phone=' + encodeURIComponent(store.phone)).catch(() => ({ known: false })),
-  ]);
-  PRODUCTS = menu.products;
-  CATS = menu.categories;
-  CTX.wallet = ctx.wallet || 0;
-  CTX.address = ctx.address || '';
-  renderWallet();
-  renderCats(CATS);
-  renderProducts();
-  renderHome();
-  renderCart();
+  try {
+    const [menu, ctx] = await Promise.all([
+      api('/shop/menu'),
+      api('/shop/context?phone=' + encodeURIComponent(store.phone)).catch(() => ({ known: false })),
+    ]);
+    PRODUCTS = menu.products;
+    CATS = menu.categories;
+    CTX.wallet = ctx.wallet || 0;
+    CTX.address = ctx.address || '';
+    renderWallet();
+    renderCats(CATS);
+    renderProducts();
+    renderHome();
+    renderCart();
+  } catch (e) {
+    toast('⚠️ Could not load — ' + e.message);
+  }
 }
 
 function renderWallet() { $('#walletChip').textContent = '👛 ' + rupee(CTX.wallet); }
@@ -106,8 +111,10 @@ function changeQty(id, delta) {
 
 // --- home (landing) ----------------------------------------------------------
 function renderHome() {
+  const showcase = $('#catShowcase');
+  if (!showcase) return;   // resilient if an old cached HTML is missing the section
   // category showcase — one tile per category with a representative emoji
-  $('#catShowcase').innerHTML = CATS.map((c) => {
+  showcase.innerHTML = CATS.map((c) => {
     const items = PRODUCTS.filter((p) => p.category === c);
     const emoji = (items[0] && items[0].emoji) || '🛍️';
     return `<button class="cat-tile" data-shopcat="${c}">
@@ -243,4 +250,11 @@ $('#walletChip').addEventListener('click', () => showScreen('orders'));
 
 // --- start -------------------------------------------------------------------
 boot();
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
+// register SW + auto-reload once when a new version takes over (kills stale caches)
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (reloaded) return; reloaded = true; location.reload();
+  });
+}
