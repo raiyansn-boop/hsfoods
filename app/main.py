@@ -1,8 +1,10 @@
 """HSFOODS — FastAPI application entry point."""
+import json
+import os
 from pathlib import Path
 
 from fastapi import FastAPI
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 from . import db
@@ -56,6 +58,20 @@ app.include_router(assistant.router)
 app.include_router(broadcast.router)
 app.include_router(chats.router)
 app.include_router(whatsapp.router)
+
+
+@app.get("/.well-known/assetlinks.json")
+def assetlinks():
+    """Digital Asset Links — proves the Play Store TWA owns this domain so it
+    runs fullscreen. Paste the JSON from PWABuilder/Bubblewrap into the
+    ANDROID_ASSETLINKS env var (or public/.well-known/assetlinks.json)."""
+    raw = os.getenv("ANDROID_ASSETLINKS", "").strip()
+    if raw:
+        return Response(content=raw, media_type="application/json")
+    f = PUBLIC_DIR / ".well-known" / "assetlinks.json"
+    if f.exists():
+        return Response(content=f.read_text(encoding="utf-8"), media_type="application/json")
+    return Response(content=json.dumps([]), media_type="application/json")
 
 
 @app.get("/")
