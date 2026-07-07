@@ -32,11 +32,23 @@
   <div class="app" id="app" hidden>
     <header class="app-header">
       <div class="app-brand">🍃 HS<b>FOODS</b></div>
+      <nav class="top-nav">
+        <button class="nav-btn active" data-screen="shop"><span>🛍️</span>Shop</button>
+        <button class="nav-btn" data-screen="cart"><span>🧺</span>Cart<span class="nav-badge" id="cartBadgeTop" hidden>0</span></button>
+        <button class="nav-btn" data-screen="orders"><span>📦</span>Orders</button>
+      </nav>
       <button class="wallet-chip" id="walletChip">👛 ₹0</button>
     </header>
 
     <!-- SHOP -->
     <main class="screen active" id="screen-shop">
+      <div class="hero">
+        <div class="hero-text">
+          <h1>Fresh fruits & groceries, <span>in minutes</span> ⚡</h1>
+          <p>Order online, pay by UPI or cash, earn cashback on every order.</p>
+        </div>
+        <div class="hero-emoji">🥭🍓🥝🍎</div>
+      </div>
       <div class="cat-chips" id="shopCats"></div>
       <div class="prod-grid" id="prodGrid"></div>
     </main>

@@ -1,5 +1,5 @@
 // HSFOODS service worker — offline app shell for the PWAs.
-const CACHE = 'hsfoods-v1';
+const CACHE = 'hsfoods-v2';
 const SHELL = [
   '/', '/index.html', '/styles.css', '/app.js',
   '/shop.html', '/shop.css', '/shop.js',
@@ -18,21 +18,35 @@ self.addEventListener('activate', (e) => {
   );
 });
 
-// Network-first for API (fresh data), cache-first for the app shell.
+// Network-first for API + pages (always fresh); cache-first for static assets.
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
   if (e.request.method !== 'GET') return;
-  if (url.pathname.startsWith('/api/')) {
-    e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+
+  const isApi = url.pathname.startsWith('/api/');
+  const isPage = e.request.mode === 'navigate' ||
+    /\.(html|js|css)$/.test(url.pathname) || url.pathname === '/';
+
+  if (isApi || isPage) {
+    // network-first: fresh content online, cached fallback offline
+    e.respondWith(
+      fetch(e.request).then((resp) => {
+        const copy = resp.clone();
+        caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
+        return resp;
+      }).catch(() => caches.match(e.request).then((c) => c || caches.match('/shop.html')))
+    );
     return;
   }
+
+  // static assets (icons, fonts): cache-first
   e.respondWith(
     caches.match(e.request).then((cached) =>
       cached || fetch(e.request).then((resp) => {
         const copy = resp.clone();
         caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
         return resp;
-      }).catch(() => caches.match('/shop.html'))
+      })
     )
   );
 });

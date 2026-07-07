@@ -109,8 +109,10 @@ function cartTotal() { return cartLines().reduce((s, l) => s + l.price * l.qty, 
 
 function renderCartBadge() {
   const n = Object.values(store.cart).reduce((a, b) => a + b, 0);
-  const badge = $('#cartBadge');
-  badge.textContent = n; badge.hidden = !n;
+  ['#cartBadge', '#cartBadgeTop'].forEach((sel) => {
+    const badge = $(sel);
+    if (badge) { badge.textContent = n; badge.hidden = !n; }
+  });
 }
 
 function renderCart() {
