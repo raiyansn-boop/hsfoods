@@ -33,22 +33,43 @@
     <header class="app-header">
       <div class="app-brand">🍃 HS<b>FOODS</b></div>
       <nav class="top-nav">
-        <button class="nav-btn active" data-screen="shop"><span>🛍️</span>Shop</button>
+        <button class="nav-btn active" data-screen="home"><span>🏠</span>Home</button>
+        <button class="nav-btn" data-screen="shop"><span>🛍️</span>Shop</button>
         <button class="nav-btn" data-screen="cart"><span>🧺</span>Cart<span class="nav-badge" id="cartBadgeTop" hidden>0</span></button>
         <button class="nav-btn" data-screen="orders"><span>📦</span>Orders</button>
       </nav>
       <button class="wallet-chip" id="walletChip">👛 ₹0</button>
     </header>
 
-    <!-- SHOP -->
-    <main class="screen active" id="screen-shop">
+    <!-- HOME (landing) -->
+    <main class="screen active" id="screen-home">
       <div class="hero">
         <div class="hero-text">
           <h1>Fresh fruits & groceries, <span>in minutes</span> ⚡</h1>
-          <p>Order online, pay by UPI or cash, earn cashback on every order.</p>
+          <p>Order online, pay by UPI or cash, and earn cashback on every order.</p>
+          <button class="hero-cta" data-screen="shop">Start shopping →</button>
         </div>
         <div class="hero-emoji">🥭🍓🥝🍎</div>
       </div>
+
+      <div class="home-section-head"><h2>Shop by category</h2><button class="link-btn" data-screen="shop">See all →</button></div>
+      <div class="cat-showcase" id="catShowcase"></div>
+
+      <div class="why-grid">
+        <div class="why-card"><div class="why-emoji">⚡</div><b>10-min delivery</b><span>Fresh to your door, fast.</span></div>
+        <div class="why-card"><div class="why-emoji">🎁</div><b>Cashback</b><span>Earn on every order.</span></div>
+        <div class="why-card"><div class="why-emoji">📲</div><b>UPI or Cash</b><span>Pay however you like.</span></div>
+        <div class="why-card"><div class="why-emoji">🍃</div><b>Always fresh</b><span>Hand-picked daily.</span></div>
+      </div>
+
+      <div class="home-section-head"><h2>Popular right now</h2><button class="link-btn" data-screen="shop">See all →</button></div>
+      <div class="prod-grid" id="featuredGrid"></div>
+
+      <footer class="home-footer">🍃 <b>HSFOODS</b> · Fresh groceries delivered · Order on WhatsApp too</footer>
+    </main>
+
+    <!-- SHOP -->
+    <main class="screen" id="screen-shop">
       <div class="cat-chips" id="shopCats"></div>
       <div class="prod-grid" id="prodGrid"></div>
     </main>
@@ -80,7 +101,8 @@
 
     <!-- BOTTOM NAV -->
     <nav class="bottom-nav">
-      <button class="nav-btn active" data-screen="shop"><span>🛍️</span>Shop</button>
+      <button class="nav-btn active" data-screen="home"><span>🏠</span>Home</button>
+      <button class="nav-btn" data-screen="shop"><span>🛍️</span>Shop</button>
       <button class="nav-btn" data-screen="cart"><span>🧺</span>Cart<span class="nav-badge" id="cartBadge" hidden>0</span></button>
       <button class="nav-btn" data-screen="orders"><span>📦</span>Orders</button>
     </nav>

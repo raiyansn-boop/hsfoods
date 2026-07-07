@@ -14,6 +14,7 @@ const store = {
   set cart(c) { localStorage.setItem('hs_cart', JSON.stringify(c)); },
 };
 let PRODUCTS = [];
+let CATS = [];
 let CTX = { wallet: 0, address: '' };
 let activeCat = null;
 
@@ -40,11 +41,13 @@ async function boot() {
     api('/shop/context?phone=' + encodeURIComponent(store.phone)).catch(() => ({ known: false })),
   ]);
   PRODUCTS = menu.products;
+  CATS = menu.categories;
   CTX.wallet = ctx.wallet || 0;
   CTX.address = ctx.address || '';
   renderWallet();
-  renderCats(menu.categories);
+  renderCats(CATS);
   renderProducts();
+  renderHome();
   renderCart();
 }
 
@@ -59,13 +62,10 @@ function renderCats(cats) {
     b.addEventListener('click', () => { activeCat = b.dataset.cat; renderCats(cats); renderProducts(); }));
 }
 
-function renderProducts() {
-  const cart = store.cart;
-  const list = PRODUCTS.filter((p) => p.category === activeCat);
-  $('#prodGrid').innerHTML = list.map((p) => {
-    const qty = cart[p.id] || 0;
-    const oos = p.stock <= 0;
-    return `
+const prodCardHtml = (p) => {
+  const qty = store.cart[p.id] || 0;
+  const oos = p.stock <= 0;
+  return `
     <div class="prod ${oos ? 'oos' : ''}">
       <div class="prod-emoji">${p.emoji}</div>
       <div class="prod-name">${p.name}</div>
@@ -73,17 +73,23 @@ function renderProducts() {
       <div class="prod-add">${oos ? '<div class="add-btn" style="opacity:.6">Out of stock</div>'
         : qty > 0 ? stepperHtml(p.id, qty) : `<button class="add-btn" data-add="${p.id}">Add +</button>`}</div>
     </div>`;
-  }).join('') || '<p style="grid-column:1/-1;text-align:center;color:var(--muted);padding:40px">No items here.</p>';
-  wireQty();
+};
+
+function renderProducts() {
+  const list = PRODUCTS.filter((p) => p.category === activeCat);
+  const grid = $('#prodGrid');
+  grid.innerHTML = list.map(prodCardHtml).join('') ||
+    '<p style="grid-column:1/-1;text-align:center;color:var(--muted);padding:40px">No items here.</p>';
+  wireQty(grid);
 }
 
 const stepperHtml = (id, qty) =>
   `<div class="stepper"><button data-dec="${id}">−</button><span class="qty">${qty}</span><button data-inc="${id}">+</button></div>`;
 
-function wireQty() {
-  document.querySelectorAll('[data-add],[data-inc]').forEach((b) =>
+function wireQty(root = document) {
+  root.querySelectorAll('[data-add],[data-inc]').forEach((b) =>
     b.addEventListener('click', () => changeQty(b.dataset.add || b.dataset.inc, 1)));
-  document.querySelectorAll('[data-dec]').forEach((b) =>
+  root.querySelectorAll('[data-dec]').forEach((b) =>
     b.addEventListener('click', () => changeQty(b.dataset.dec, -1)));
 }
 
@@ -93,8 +99,34 @@ function changeQty(id, delta) {
   if (cart[id] <= 0) delete cart[id];
   store.cart = cart;
   renderProducts();
+  renderFeatured();
   renderCartBadge();
   if (currentScreen() === 'cart') renderCart();
+}
+
+// --- home (landing) ----------------------------------------------------------
+function renderHome() {
+  // category showcase — one tile per category with a representative emoji
+  $('#catShowcase').innerHTML = CATS.map((c) => {
+    const items = PRODUCTS.filter((p) => p.category === c);
+    const emoji = (items[0] && items[0].emoji) || '🛍️';
+    return `<button class="cat-tile" data-shopcat="${c}">
+      <div class="cat-tile-emoji">${emoji}</div>
+      <div class="cat-tile-name">${c}</div>
+      <div class="cat-tile-count">${items.length} item${items.length === 1 ? '' : 's'}</div>
+    </button>`;
+  }).join('');
+  document.querySelectorAll('[data-shopcat]').forEach((b) =>
+    b.addEventListener('click', () => { activeCat = b.dataset.shopcat; renderCats(CATS); renderProducts(); showScreen('shop'); }));
+  renderFeatured();
+}
+
+function renderFeatured() {
+  const grid = $('#featuredGrid');
+  if (!grid) return;
+  const list = PRODUCTS.filter((p) => p.stock > 0).slice(0, 8);
+  grid.innerHTML = list.map(prodCardHtml).join('');
+  wireQty(grid);
 }
 
 // --- cart --------------------------------------------------------------------
@@ -196,14 +228,17 @@ async function renderOrders() {
 }
 
 // --- navigation --------------------------------------------------------------
-const currentScreen = () => document.querySelector('.nav-btn.active')?.dataset.screen || 'shop';
+const currentScreen = () => document.querySelector('.nav-btn.active')?.dataset.screen || 'home';
 function showScreen(name) {
   document.querySelectorAll('.nav-btn').forEach((b) => b.classList.toggle('active', b.dataset.screen === name));
   document.querySelectorAll('.screen').forEach((s) => s.classList.toggle('active', s.id === 'screen-' + name));
+  if (name === 'home') renderHome();
   if (name === 'cart') renderCart();
   if (name === 'orders') renderOrders();
+  window.scrollTo(0, 0);
 }
-document.querySelectorAll('.nav-btn').forEach((b) => b.addEventListener('click', () => showScreen(b.dataset.screen)));
+// wire nav buttons + any element with data-screen (hero CTA, "see all" links)
+document.querySelectorAll('[data-screen]').forEach((b) => b.addEventListener('click', () => showScreen(b.dataset.screen)));
 $('#walletChip').addEventListener('click', () => showScreen('orders'));
 
 // --- start -------------------------------------------------------------------
