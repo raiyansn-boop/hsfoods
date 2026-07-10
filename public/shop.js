@@ -7,11 +7,19 @@ const api = async (path, opts) => {
 const rupee = (n) => '₹' + Number(n || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 });
 
 // --- state -------------------------------------------------------------------
+// Storage wrapper: falls back to in-memory when localStorage is blocked
+// (private mode / strict privacy settings), so the app never crashes.
+const _mem = {};
+const LS = {
+  get(k) { try { return localStorage.getItem(k); } catch { return k in _mem ? _mem[k] : null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch { _mem[k] = v; } },
+  remove(k) { try { localStorage.removeItem(k); } catch { delete _mem[k]; } },
+};
 const store = {
-  get phone() { return localStorage.getItem('hs_phone') || ''; },
-  get name() { return localStorage.getItem('hs_name') || ''; },
-  get cart() { try { return JSON.parse(localStorage.getItem('hs_cart') || '{}'); } catch { return {}; } },
-  set cart(c) { localStorage.setItem('hs_cart', JSON.stringify(c)); },
+  get phone() { return LS.get('hs_phone') || ''; },
+  get name() { return LS.get('hs_name') || ''; },
+  get cart() { try { return JSON.parse(LS.get('hs_cart') || '{}'); } catch { return {}; } },
+  set cart(c) { LS.set('hs_cart', JSON.stringify(c)); },
 };
 let PRODUCTS = [];
 let CATS = [];
@@ -27,9 +35,9 @@ function toast(msg) {
 $('#obStart').addEventListener('click', () => {
   const phone = $('#obPhone').value.replace(/\D/g, '');
   if (phone.length < 8) { toast('Enter a valid number'); return; }
-  localStorage.setItem('hs_phone', phone);
-  if ($('#obName').value.trim()) localStorage.setItem('hs_name', $('#obName').value.trim());
-  if ($('#obRef').value.trim()) localStorage.setItem('hs_ref', $('#obRef').value.trim());
+  LS.set('hs_phone', phone);
+  if ($('#obName').value.trim()) LS.set('hs_name', $('#obName').value.trim());
+  if ($('#obRef').value.trim()) LS.set('hs_ref', $('#obRef').value.trim());
   boot();
 });
 
@@ -190,11 +198,11 @@ $('#placeOrder').addEventListener('click', async () => {
         phone: store.phone, name: store.name, address,
         items: lines.map((l) => ({ productId: l.id, qty: l.qty })),
         paymentMode: payment, useWallet: $('#useWallet').checked,
-        referralCode: localStorage.getItem('hs_ref') || null,
+        referralCode: LS.get('hs_ref') || null,
       }),
     });
     store.cart = {}; renderCart(); renderProducts();
-    localStorage.removeItem('hs_ref');
+    LS.remove('hs_ref');
     // refresh wallet after redemption
     const ctx = await api('/shop/context?phone=' + encodeURIComponent(store.phone)).catch(() => ({}));
     CTX.wallet = ctx.wallet || 0; renderWallet();
