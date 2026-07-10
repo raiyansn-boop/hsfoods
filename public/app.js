@@ -1,10 +1,7 @@
-// Register the PWA service worker (installable management app) + auto-reload on update
+// Recover from any previously-installed service worker (stale cache) without
+// registering a new one — the kill-switch sw.js clears caches and unregisters.
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').catch(() => {});
-  let reloaded = false;
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (reloaded) return; reloaded = true; location.reload();
-  });
+  navigator.serviceWorker.getRegistration().then((r) => { if (r) r.update(); }).catch(() => {});
 }
 
 const $ = (sel) => document.querySelector(sel);
