@@ -261,10 +261,14 @@ $('#walletChip').addEventListener('click', () => showScreen('orders'));
 
 // --- start -------------------------------------------------------------------
 boot();
-// Recover from any previously-installed service worker (stale cache). We do NOT
-// register a new SW here — we only nudge an EXISTING one to update, so the
-// kill-switch sw.js runs, clears caches, unregisters and reloads. Fresh
-// browsers have no registration, so nothing happens (no loop, plain website).
+// Register the network-first service worker (installable customer app).
+// Auto-reloads once only on a genuine UPDATE (not first install) — never loops.
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistration().then((r) => { if (r) r.update(); }).catch(() => {});
+  const hadController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (reloaded || !hadController) return;
+    reloaded = true; location.reload();
+  });
 }

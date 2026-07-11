@@ -1,7 +1,14 @@
-// Recover from any previously-installed service worker (stale cache) without
-// registering a new one — the kill-switch sw.js clears caches and unregisters.
+// Register the network-first service worker (installable back-office app).
+// Auto-reloads once only on a genuine UPDATE (not first install), so a new
+// version rolls out cleanly without ever looping.
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistration().then((r) => { if (r) r.update(); }).catch(() => {});
+  const hadController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (reloaded || !hadController) return;
+    reloaded = true; location.reload();
+  });
 }
 
 const $ = (sel) => document.querySelector(sel);
