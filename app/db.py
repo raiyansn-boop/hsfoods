@@ -263,6 +263,16 @@ def payment_config(conn) -> dict:
     }
 
 
+def whatsapp_config(conn) -> dict:
+    """WhatsApp Cloud API credentials — settings table first, then env fallback."""
+    return {
+        "token": get_setting(conn, "wa_token") or os.getenv("WHATSAPP_TOKEN", ""),
+        "phoneId": get_setting(conn, "wa_phone_id") or os.getenv("WHATSAPP_PHONE_ID", ""),
+        "wabaId": get_setting(conn, "wa_waba_id") or os.getenv("WHATSAPP_WABA_ID", ""),
+        "verifyToken": get_setting(conn, "wa_verify_token") or os.getenv("WHATSAPP_VERIFY_TOKEN", "hsfoods-verify"),
+    }
+
+
 def upi_link(vpa: str, name: str, amount: float, note: str) -> str:
     from urllib.parse import quote
     return (

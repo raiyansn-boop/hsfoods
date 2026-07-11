@@ -2,6 +2,7 @@ import os
 
 from fastapi import APIRouter, Request, Response
 
+from .. import db
 from ..bot_engine import handle_message
 from ..models import SimulateIn
 
@@ -18,7 +19,11 @@ def simulate(body: SimulateIn):
 @router.get("/webhook")
 def verify_webhook(request: Request):
     """Meta WhatsApp Cloud API verification handshake."""
-    verify_token = os.getenv("WHATSAPP_VERIFY_TOKEN", "hsfoods-verify")
+    conn = db.get_conn()
+    try:
+        verify_token = db.whatsapp_config(conn)["verifyToken"]
+    finally:
+        conn.close()
     params = request.query_params
     if params.get("hub.mode") == "subscribe" and params.get("hub.verify_token") == verify_token:
         return Response(content=params.get("hub.challenge", ""), media_type="text/plain")
@@ -115,15 +120,23 @@ def _payload_for(to: str, result: dict) -> dict:
 
 
 async def _send_whatsapp(to: str, result: dict) -> None:
-    token = os.getenv("WHATSAPP_TOKEN")
-    phone_id = os.getenv("WHATSAPP_PHONE_ID")
+    conn = db.get_conn()
+    try:
+        cfg = db.whatsapp_config(conn)
+    finally:
+        conn.close()
+    token, phone_id = cfg["token"], cfg["phoneId"]
     if not token or not phone_id:
         print(f"[whatsapp:dry-run] -> {to}:\n{result['text']}\n")
         return
     import httpx  # imported lazily — only needed for live WhatsApp sending
-    async with httpx.AsyncClient() as client:
-        await client.post(
-            f"https://graph.facebook.com/v20.0/{phone_id}/messages",
-            headers={"Authorization": f"Bearer {token}"},
-            json=_payload_for(to, result),
-        )
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            await client.post(
+                f"https://graph.facebook.com/v20.0/{phone_id}/messages",
+                headers={"Authorization": f"Bearer {token}"},
+                json=_payload_for(to, result),
+            )
+    except Exception as exc:
+        # never let a WhatsApp send failure break the request that triggered it
+        print(f"[whatsapp:send-failed] -> {to}: {exc}")

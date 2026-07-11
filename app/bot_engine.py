@@ -164,7 +164,8 @@ def _receipt(order: dict) -> str:
     if order.get("loyalty"):
         lines += ["", f"🎁 You'll earn *{_money(order['loyalty'])}* loyalty cashback "
                   "in your wallet after delivery!"]
-    lines += ["", "🚚 Out for delivery in ~10 minutes.", "Thanks for shopping with HSFOODS! 🍃"]
+    lines += ["", "🧺 *Order received* — we're preparing it now.",
+              "We'll message you when it ships & when it's delivered. 🍃"]
     return "\n".join(lines)
 
 

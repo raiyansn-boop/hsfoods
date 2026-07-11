@@ -27,7 +27,7 @@ const TITLES = {
   dashboard: 'WhatsApp Dashboard', products: 'Products & Catalogue', orders: 'Orders',
   customers: 'Customers', referrals: 'Referrals & Wallet', chats: 'Live Messages',
   scan: 'Scan Lookup', bot: 'WhatsApp Bot', analytics: 'WhatsApp Analytics',
-  templates: 'Message Templates', catalog: 'WhatsApp Catalog',
+  templates: 'Message Templates', catalog: 'WhatsApp Catalog', settings: 'Settings',
 };
 function navTo(view) {
   document.querySelectorAll('.sb-item').forEach((t) => t.classList.toggle('active', t.dataset.view === view));
@@ -81,6 +81,7 @@ function setNavCount(id, n) {
 
 // --- renderers --------------------------------------------------------------
 async function render(view) {
+  document.body.classList.add('loading');   // top progress bar
   try {
     if (view === 'dashboard') await renderDashboard();
     if (view === 'products') await renderProducts();
@@ -91,9 +92,12 @@ async function render(view) {
     if (view === 'analytics') await renderAnalytics();
     if (view === 'templates') await renderTemplates();
     if (view === 'catalog') await renderCatalog();
+    if (view === 'settings') await renderSettings();
     if (view === 'scan') $('#scanInput').focus();
   } catch (e) {
     toast('⚠️ ' + e.message);
+  } finally {
+    document.body.classList.remove('loading');
   }
 }
 
@@ -669,6 +673,36 @@ $('#adminChatForm').addEventListener('submit', async (e) => {
 setInterval(() => {
   if (currentView() === 'chats') renderChats().catch(() => {});
 }, 5000);
+
+// --- Settings (WhatsApp / Meta config) ----------------------------------------
+async function renderSettings() {
+  const w = await api('/settings/whatsapp');
+  const st = $('#waStatus');
+  st.textContent = w.connected ? '● connected' : '○ not connected';
+  st.className = 'badge ' + (w.connected ? 'b-green' : 'b-gray');
+  $('#waToken').value = '';
+  $('#waToken').placeholder = w.tokenSet ? `token saved (${w.tokenHint}) — leave blank to keep` : 'EAAG… paste your token';
+  $('#waPhoneId').value = w.phoneId || '';
+  $('#waWabaId').value = w.wabaId || '';
+  $('#waVerify').value = w.verifyToken || '';
+  $('#waHint').textContent = w.connected
+    ? '✅ Live — the bot & broadcasts send to real WhatsApp.'
+    : 'Not connected — messages run in simulator/dry-run mode until you add a token + phone ID.';
+  $('#waCallback').textContent = location.origin + '/api/whatsapp/webhook';
+  $('#waVerifyShow').textContent = w.verifyToken || 'hsfoods-verify';
+}
+$('#waForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const body = {
+    phoneId: $('#waPhoneId').value.trim(),
+    wabaId: $('#waWabaId').value.trim(),
+    verifyToken: $('#waVerify').value.trim(),
+  };
+  if ($('#waToken').value.trim()) body.token = $('#waToken').value.trim();
+  await api('/settings/whatsapp', { method: 'PATCH', body: JSON.stringify(body) });
+  toast('⚙️ WhatsApp setup saved');
+  await renderSettings();
+});
 
 // --- Message Templates --------------------------------------------------------
 const TPL_CAT_CLASS = { 'Status update': 'b-blue', 'Payment': 'b-yellow', 'Marketing': 'b-purple', 'Order placed': 'b-wa' };

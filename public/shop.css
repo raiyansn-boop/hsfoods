@@ -133,6 +133,13 @@ button,input{font-family:inherit}
 .confirm-loyalty{background:var(--green-xl);color:var(--green-d);border-radius:12px;padding:12px;font-size:14px;font-weight:600;margin:14px 0}
 .confirm-upi{display:block;background:var(--green);color:#fff;border-radius:12px;padding:13px;font-weight:700;text-decoration:none;margin:10px 0}
 
+/* LOADING + PRESS FEEDBACK */
+.app-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:70px 20px;color:var(--muted);font-size:14px}
+.spinner{width:34px;height:34px;border:3px solid var(--green-l);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.btn-primary:active,.add-btn:active,.nav-btn:active,.cat-tile:active,.stepper button:active,.hero-cta:active,.wallet-chip:active,.cat-chip:active{transform:scale(.96)}
+.btn-primary,.add-btn,.cat-tile,.hero-cta,.wallet-chip,.cat-chip,.prod,.wa-send{transition:transform .12s,background .15s,box-shadow .15s}
+
 /* TOAST */
 .toast{position:fixed;bottom:calc(var(--nav-h) + 16px);left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:11px 18px;border-radius:22px;font-size:14px;opacity:0;pointer-events:none;transition:all .25s;z-index:170;white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}

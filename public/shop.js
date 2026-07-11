@@ -45,6 +45,7 @@ async function boot() {
   if (!store.phone) { $('#onboard').hidden = false; $('#app').hidden = true; return; }
   // show the app shell first so onboarding can never get "stuck" on errors
   $('#onboard').hidden = true; $('#app').hidden = false;
+  const loader = $('#appLoading'); if (loader) loader.hidden = false;
   try {
     const [menu, ctx] = await Promise.all([
       api('/shop/menu'),
@@ -61,6 +62,8 @@ async function boot() {
     renderCart();
   } catch (e) {
     toast('⚠️ Could not load — ' + e.message);
+  } finally {
+    if (loader) loader.hidden = true;
   }
 }
 
@@ -225,7 +228,7 @@ function showConfirm(r) {
     ${r.paymentMode === 'upi' && r.upiLink ? `<a class="confirm-upi" href="${r.upiLink}">📲 Pay ${rupee(r.total)} via UPI</a>` : ''}
     ${r.paymentMode === 'cod' && r.total > 0 ? `<div class="confirm-line">💵 Pay ${rupee(r.total)} cash on delivery</div>` : ''}
     ${r.loyalty ? `<div class="confirm-loyalty">🎁 You'll earn ${rupee(r.loyalty)} cashback after delivery!</div>` : ''}
-    <div class="confirm-line">🚚 Out for delivery in ~10 minutes</div>
+    <div class="confirm-line">🧺 Order received — we're preparing it. You'll get updates as it ships & arrives.</div>
     <button class="btn-primary" style="margin-top:14px" id="confirmDone">Track my orders</button>`;
   $('#confirm').hidden = false;
   $('#confirmDone').addEventListener('click', () => { $('#confirm').hidden = true; showScreen('orders'); });

@@ -43,6 +43,9 @@
     <button class="sb-item" data-view="customers"><span class="si">👥</span> Customers</button>
     <button class="sb-item" data-view="referrals"><span class="si">🎁</span> Referrals &amp; Wallet</button>
 
+    <div class="sb-sec">Setup</div>
+    <button class="sb-item" data-view="settings"><span class="si">⚙️</span> Settings</button>
+
     <div class="sb-footer">
       <div class="sb-user">
         <div class="sb-av">A</div>
@@ -53,6 +56,7 @@
 
   <!-- MAIN -->
   <div class="main">
+    <div class="loadbar" id="loadBar"></div>
     <div class="topbar">
       <div class="topbar-title">
         <span class="live-dot"></span>
@@ -227,6 +231,40 @@
         </form>
         <video id="scanVideo" playsinline muted></video>
         <div id="scanResult"></div>
+      </div>
+    </section>
+
+    <!-- SETTINGS (WhatsApp / Meta config) -->
+    <section class="view" id="view-settings">
+      <div class="card">
+        <div class="card-head">
+          <h3>🟢 WhatsApp Business API</h3>
+          <span class="badge" id="waStatus"></span>
+        </div>
+        <p class="muted">Connect your Meta WhatsApp Cloud API so the bot, broadcasts, and order-status updates reach real customers. Get these from <b>developers.facebook.com</b> → your app → WhatsApp → API Setup.</p>
+        <form id="waForm" class="setup-form">
+          <label class="fld">WhatsApp Access Token
+            <input id="waToken" type="password" placeholder="EAAG… (leave blank to keep current)" autocomplete="off" />
+          </label>
+          <label class="fld">Phone Number ID
+            <input id="waPhoneId" placeholder="e.g. 918765432101234" />
+          </label>
+          <label class="fld">WhatsApp Business Account ID (WABA)
+            <input id="waWabaId" placeholder="optional" />
+          </label>
+          <label class="fld">Webhook Verify Token
+            <input id="waVerify" placeholder="hsfoods-verify" />
+          </label>
+          <button class="btn btn-wa" type="submit">Save WhatsApp setup</button>
+          <p class="muted" id="waHint"></p>
+        </form>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>🔗 Meta Webhook</h3></div>
+        <p class="muted">In your Meta app → <b>WhatsApp → Configuration</b>, set the webhook to these values, then subscribe to the <b>messages</b> field:</p>
+        <div class="kv"><span>Callback URL</span><code id="waCallback">—</code></div>
+        <div class="kv"><span>Verify Token</span><code id="waVerifyShow">—</code></div>
+        <p class="muted">⚠️ The callback URL must be public HTTPS (deploy first — see <code>DEPLOY.md</code>). On <code>localhost</code> the built-in simulator works without any of this.</p>
       </div>
     </section>
 

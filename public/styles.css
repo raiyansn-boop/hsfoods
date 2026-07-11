@@ -249,6 +249,33 @@ table.data tbody tr:hover td{background:var(--bg)}
 .scan-items li:last-child{border-bottom:none}
 .scan-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 
+/* POLISH: loading bar, press feedback, empty states, mobile */
+.loadbar{position:fixed;top:0;left:var(--sidebar);right:0;height:3px;z-index:200;overflow:hidden;pointer-events:none}
+.loadbar::before{content:'';position:absolute;top:0;left:-40%;width:40%;height:100%;background:var(--wa);opacity:0}
+body.loading .loadbar::before{opacity:1;animation:loadslide .9s ease-in-out infinite}
+@keyframes loadslide{0%{left:-40%}100%{left:100%}}
+.btn:active,.primary:active,.btn-wa:active,.btn-outline:active,.ghost-btn:active,.mini:active,.wa-send:active,.tb-btn:active,.sb-item:active{transform:scale(.96)}
+.btn,.primary,.btn-wa,.btn-outline,.ghost-btn,.mini,.wa-send,.chip-act,.wa-btn,.cat-chip{transition:all .12s}
+table.data td.muted{text-align:center;padding:30px 14px;color:var(--faint)}
+@media (max-width:820px){.loadbar{left:64px}}
+@media (max-width:640px){
+  .content{padding:14px}
+  .tb-search{display:none}
+  .topbar{padding:0 14px}
+  .card{padding:16px}
+  .kpi .value{font-size:22px}
+}
+
+/* SETTINGS (WhatsApp / Meta) */
+.setup-form{display:flex;flex-direction:column;gap:12px;max-width:540px}
+.fld{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:600;color:var(--text2)}
+.fld input{border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:14px;outline:none;font-family:inherit}
+.fld input:focus{border-color:var(--wa)}
+.kv{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);font-size:13px}
+.kv:last-child{border-bottom:none}
+.kv>span{color:var(--muted);flex:none}
+.kv code{background:var(--bg);padding:5px 9px;border-radius:6px;font-size:12px;word-break:break-all;text-align:right}
+
 /* MESSAGE TEMPLATES */
 .tpl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
 .tpl-card{display:flex;flex-direction:column;margin-bottom:0}

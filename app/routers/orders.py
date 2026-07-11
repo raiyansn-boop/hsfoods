@@ -8,6 +8,7 @@ from fastapi.responses import Response
 from .. import db
 from ..models import OrderCreate, OrderUpdate
 from ..slip import build_slip
+from .whatsapp import _send_whatsapp
 
 router = APIRouter(prefix="/api/orders", tags=["orders"])
 
@@ -108,12 +109,21 @@ def create_order(body: OrderCreate):
         conn.close()
 
 
+STATUS_NOTES = {
+    "packed": "📦 Good news! Your HSFOODS order *{code}* is packed and being prepared.",
+    "out_for_delivery": "🛵 Your HSFOODS order *{code}* is out for delivery — arriving soon!",
+    "delivered": "✅ Your HSFOODS order *{code}* has been delivered. Enjoy your fresh picks! 🍎\nReply *menu* to order again.",
+    "cancelled": "❌ Your HSFOODS order *{code}* was cancelled. Reply *menu* if you'd like to reorder.",
+}
+
+
 @router.patch("/{order_ref}")
-def update_order(order_ref: str, body: OrderUpdate):
+async def update_order(order_ref: str, body: OrderUpdate):
     if body.status is not None and body.status not in STATUSES:
         raise HTTPException(status_code=400, detail=f"status must be one of {', '.join(STATUSES)}")
     if body.payment_status is not None and body.payment_status not in ("pending", "paid"):
         raise HTTPException(status_code=400, detail="payment_status must be pending or paid")
+    notify = None
     conn = db.get_conn()
     try:
         existing = conn.execute(
@@ -129,12 +139,19 @@ def update_order(order_ref: str, body: OrderUpdate):
             )
             conn.commit()
 
-        if body.status is not None:
+        if body.status is not None and body.status != existing["status"]:
             was_delivered = existing["delivered_at"] is not None
             conn.execute(
                 "UPDATE orders SET status = ? WHERE id = ?", (body.status, existing["id"])
             )
             conn.commit()
+
+            # notify the customer when the order actually advances
+            note = STATUS_NOTES.get(body.status)
+            if note:
+                text = note.format(code=existing["code"])
+                db.log_message(conn, existing["phone"], "bot", text)
+                notify = (existing["phone"], text)
 
             # referral side-effects of the status transition
             if body.status == "delivered":
@@ -150,6 +167,11 @@ def update_order(order_ref: str, body: OrderUpdate):
                 db.reverse_order_rewards(conn, existing["id"], delivered=was_delivered)
 
         row = conn.execute("SELECT * FROM orders WHERE id = ?", (existing["id"],)).fetchone()
-        return db.order_to_dict(row)
+        result = db.order_to_dict(row)
     finally:
         conn.close()
+
+    if notify:
+        phone, text = notify
+        await _send_whatsapp(phone, {"text": text, "buttons": [], "menu": []})
+    return result
