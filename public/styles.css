@@ -45,6 +45,9 @@ a{color:inherit}
 .tb-search input{border:none;background:none;outline:none;font-size:13px;width:100%;font-family:inherit}
 .tb-btn{background:none;border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-size:16px;cursor:pointer}
 .tb-btn:hover{border-color:var(--wa)}
+.tb-btn.spinning{animation:spin .5s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.tb-search:focus-within{border-color:var(--wa)}
 .content{padding:24px;flex:1;overflow-y:auto}
 
 /* VIEWS */

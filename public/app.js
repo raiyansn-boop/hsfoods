@@ -34,12 +34,43 @@ function navTo(view) {
   document.querySelectorAll('.view').forEach((v) => v.classList.toggle('active', v.id === 'view-' + view));
   const t = $('#topTitle');
   if (t) t.textContent = TITLES[view] || view;
+  const s = $('#globalSearch');
+  if (s) { s.value = ''; }         // reset any active filter on tab switch
   render(view);
 }
 document.querySelectorAll('.sb-item[data-view]').forEach((item) =>
   item.addEventListener('click', () => navTo(item.dataset.view)));
 const currentView = () => document.querySelector('.sb-item.active')?.dataset.view || 'dashboard';
-$('#refreshBtn')?.addEventListener('click', () => render(currentView()));
+
+// refresh with a little spin feedback
+$('#refreshBtn')?.addEventListener('click', async (e) => {
+  e.currentTarget.classList.add('spinning');
+  try { await render(currentView()); } finally {
+    setTimeout(() => e.currentTarget.classList.remove('spinning'), 400);
+  }
+});
+
+// live search — filters the active view's tables + conversation list
+$('#globalSearch')?.addEventListener('input', (e) => {
+  const q = e.target.value.trim().toLowerCase();
+  const view = document.querySelector('.view.active');
+  if (!view) return;
+  view.querySelectorAll('table.data').forEach((tbl) => {
+    let catRow = null, catHasMatch = false;
+    const settleCat = () => { if (catRow) catRow.style.display = (q && !catHasMatch) ? 'none' : ''; };
+    [...tbl.rows].forEach((row) => {
+      if (row.querySelector('th')) return;                 // column header
+      if (row.classList.contains('cat-row')) { settleCat(); catRow = row; catHasMatch = false; return; }
+      const match = !q || row.textContent.toLowerCase().includes(q);
+      row.style.display = match ? '' : 'none';
+      if (match) catHasMatch = true;
+    });
+    settleCat();
+  });
+  view.querySelectorAll('.conv').forEach((c) => {
+    c.style.display = (!q || c.textContent.toLowerCase().includes(q)) ? '' : 'none';
+  });
+});
 
 function setNavCount(id, n) {
   const el = document.getElementById(id);
