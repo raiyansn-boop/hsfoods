@@ -7,13 +7,16 @@ const api = async (path, opts) => {
 const rupee = (n) => '₹' + Number(n || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 });
 
 // --- state -------------------------------------------------------------------
-// Storage wrapper: falls back to in-memory when localStorage is blocked
-// (private mode / strict privacy settings), so the app never crashes.
+// Storage wrapper: in-memory _mem is the source of truth for this session,
+// localStorage is best-effort persistence. Some Android Custom Tabs / private
+// modes let setItem run without throwing yet never persist (or partition
+// storage), which would make the app bounce back to onboarding. Reading _mem
+// first guarantees a value we just set is always readable this session.
 const _mem = {};
 const LS = {
-  get(k) { try { return localStorage.getItem(k); } catch { return k in _mem ? _mem[k] : null; } },
-  set(k, v) { try { localStorage.setItem(k, v); } catch { _mem[k] = v; } },
-  remove(k) { try { localStorage.removeItem(k); } catch { delete _mem[k]; } },
+  get(k) { if (k in _mem) return _mem[k]; try { return localStorage.getItem(k); } catch { return null; } },
+  set(k, v) { _mem[k] = v; try { localStorage.setItem(k, v); } catch {} },
+  remove(k) { delete _mem[k]; try { localStorage.removeItem(k); } catch {} },
 };
 const store = {
   get phone() { return LS.get('hs_phone') || ''; },
@@ -32,13 +35,22 @@ function toast(msg) {
 }
 
 // --- onboarding --------------------------------------------------------------
-$('#obStart').addEventListener('click', () => {
-  const phone = $('#obPhone').value.replace(/\D/g, '');
+function startShopping() {
+  const phone = ($('#obPhone').value || '').replace(/\D/g, '');
   if (phone.length < 8) { toast('Enter a valid number'); return; }
   LS.set('hs_phone', phone);
-  if ($('#obName').value.trim()) LS.set('hs_name', $('#obName').value.trim());
-  if ($('#obRef').value.trim()) LS.set('hs_ref', $('#obRef').value.trim());
+  const nameEl = $('#obName'); if (nameEl && nameEl.value.trim()) LS.set('hs_name', nameEl.value.trim());
+  const refEl = $('#obRef'); if (refEl && refEl.value.trim()) LS.set('hs_ref', refEl.value.trim());
   boot();
+}
+$('#obStart').addEventListener('click', () => {
+  try { startShopping(); }
+  catch (e) { toast('Could not start — ' + (e && e.message ? e.message : e)); }
+});
+// Enter key on either input also starts shopping
+['#obPhone', '#obName', '#obRef'].forEach((sel) => {
+  const el = $(sel);
+  if (el) el.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') { ev.preventDefault(); $('#obStart').click(); } });
 });
 
 async function boot() {
