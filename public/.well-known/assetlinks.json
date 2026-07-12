@@ -1,1 +1,8 @@
-[]
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.onrender.hsfoods.twa",
+    "sha256_cert_fingerprints": ["2B:E8:27:FE:D8:5F:39:D7:9A:77:D9:C1:5A:A1:11:E6:23:74:19:F3:DD:F2:D3:A5:A2:BA:BD:06:09:EF:D6:63"]
+  }
+}]
