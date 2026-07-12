@@ -8,6 +8,8 @@
 html,body{height:100%}
 body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;overscroll-behavior-y:none}
 button,input{font-family:inherit}
+/* the [hidden] attribute must always win, even over display:flex on .onboard */
+[hidden]{display:none!important}
 .btn-primary{background:var(--wa);color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;width:100%}
 .btn-primary:hover{background:var(--green)}
 
