@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
-  <title>HSFOODS — Fresh Fruits</title>
-  <meta name="theme-color" content="#1B8B4B" />
+  <title>HSFOODS — Fresh groceries delivered</title>
+  <meta name="theme-color" content="#0B0F0E" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <link rel="manifest" href="/shop-manifest.json" />
   <link rel="apple-touch-icon" href="/icons/shop-192.png" />
   <link rel="icon" href="/icons/shop-192.png" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="shop.css" />
 </head>
 <body>
@@ -17,97 +17,190 @@
   <!-- ONBOARDING (phone gate) -->
   <div class="onboard" id="onboard">
     <div class="onboard-card">
-      <div class="onboard-logo">🍃</div>
-      <h1>HS<span>FOODS</span></h1>
-      <p>Fresh fruits & groceries, delivered in minutes ⚡</p>
+      <div class="onboard-logo">HS<span>FOODS</span></div>
+      <p class="onboard-tag">Fresh groceries, delivered fast ⚡</p>
       <input id="obPhone" type="tel" inputmode="numeric" placeholder="Your WhatsApp number" />
       <input id="obName" type="text" placeholder="Your name (optional)" />
       <input id="obRef" type="text" placeholder="Referral code (optional)" />
-      <button class="btn-primary" id="obStart">Start shopping →</button>
-      <p class="onboard-fine">No password needed. We use your number to save your cart, wallet & orders.</p>
+      <button class="btn-lime" id="obStart">Start shopping →</button>
+      <p class="onboard-fine">No password needed. We use your number to save your cart, wallet &amp; orders.</p>
     </div>
   </div>
 
   <!-- APP -->
   <div class="app" id="app" hidden>
-    <header class="app-header">
-      <div class="app-brand">🍃 HS<b>FOODS</b></div>
-      <nav class="top-nav">
-        <button class="nav-btn active" data-screen="home"><span>🏠</span>Home</button>
-        <button class="nav-btn" data-screen="shop"><span>🛍️</span>Shop</button>
-        <button class="nav-btn" data-screen="cart"><span>🧺</span>Cart<span class="nav-badge" id="cartBadgeTop" hidden>0</span></button>
-        <button class="nav-btn" data-screen="orders"><span>📦</span>Orders</button>
-      </nav>
-      <button class="wallet-chip" id="walletChip">👛 ₹0</button>
+
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <div class="topbar-main">
+        <div class="brand">HS<span>FOODS</span></div>
+        <div class="topbar-icons">
+          <button class="icon-btn" id="notifBtn" aria-label="Notifications">🔔<span class="dot" id="notifDot" hidden></span></button>
+          <button class="icon-btn" id="cartIconTop" aria-label="Basket">🧺<span class="icon-badge" id="cartBadgeTop" hidden>0</span></button>
+        </div>
+      </div>
+      <button class="deliver-row" id="deliverRow">
+        <span class="pin">📍</span>
+        <span class="deliver-text">
+          <span class="deliver-label">Deliver to</span>
+          <span class="deliver-addr" id="deliverAddr">Set your delivery address ›</span>
+        </span>
+        <span class="deliver-chev">⌄</span>
+      </button>
+      <div class="searchbar">
+        <span class="search-ico">🔍</span>
+        <input id="searchInput" type="search" placeholder="Search for products…" />
+      </div>
     </header>
 
     <div class="app-loading" id="appLoading" hidden><div class="spinner"></div><span>Loading fresh stock…</span></div>
 
-    <!-- HOME (landing) -->
+    <!-- HOME -->
     <main class="screen active" id="screen-home">
-      <div class="hero">
-        <div class="hero-text">
-          <h1>Fresh fruits & groceries, <span>in minutes</span> ⚡</h1>
-          <p>Order online, pay by UPI or cash, and earn cashback on every order.</p>
-          <button class="hero-cta" data-screen="shop">Start shopping →</button>
+      <div class="promo">
+        <div class="promo-text">
+          <h2>Fresh groceries,<br>delivered fast</h2>
+          <p>Earn cashback on every order ⚡</p>
+          <button class="promo-cta" data-screen="categories">Shop now</button>
         </div>
-        <div class="hero-emoji">🥭🍓🥝🍎</div>
+        <div class="promo-art">🛒</div>
       </div>
 
-      <div class="home-section-head"><h2>Shop by category</h2><button class="link-btn" data-screen="shop">See all →</button></div>
-      <div class="cat-showcase" id="catShowcase"></div>
+      <div class="cat-circles" id="catCircles"></div>
 
-      <div class="why-grid">
-        <div class="why-card"><div class="why-emoji">⚡</div><b>10-min delivery</b><span>Fresh to your door, fast.</span></div>
-        <div class="why-card"><div class="why-emoji">🎁</div><b>Cashback</b><span>Earn on every order.</span></div>
-        <div class="why-card"><div class="why-emoji">📲</div><b>UPI or Cash</b><span>Pay however you like.</span></div>
-        <div class="why-card"><div class="why-emoji">🍃</div><b>Always fresh</b><span>Hand-picked daily.</span></div>
+      <div class="sec-head"><h3>Top picks for you</h3><button class="link" data-screen="categories">View all ›</button></div>
+      <div class="tile-scroll" id="topPicks"></div>
+
+      <div class="delivery-info">
+        <div class="di-card">
+          <div class="di-ico">🛵</div>
+          <div><b>Free delivery</b><span>On every order</span></div>
+        </div>
+        <div class="di-card">
+          <div class="di-ico">⚡</div>
+          <div><b>Express delivery</b><span>In minutes</span></div>
+        </div>
       </div>
 
-      <div class="home-section-head"><h2>Popular right now</h2><button class="link-btn" data-screen="shop">See all →</button></div>
-      <div class="prod-grid" id="featuredGrid"></div>
+      <div class="sec-head"><h3>Popular right now</h3><button class="link" data-screen="categories">View all ›</button></div>
+      <div class="prod-list" id="popularList"></div>
 
       <footer class="home-footer">🍃 <b>HSFOODS</b> · Fresh groceries delivered · Order on WhatsApp too</footer>
     </main>
 
-    <!-- SHOP -->
-    <main class="screen" id="screen-shop">
-      <div class="cat-chips" id="shopCats"></div>
-      <div class="prod-grid" id="prodGrid"></div>
+    <!-- CATEGORIES -->
+    <main class="screen" id="screen-categories">
+      <div class="screen-head"><h2>Categories</h2></div>
+      <div class="cat-grid" id="catGrid"></div>
     </main>
 
-    <!-- CART -->
-    <main class="screen" id="screen-cart">
-      <h2 class="screen-title">🧺 Your basket</h2>
-      <div id="cartItems"></div>
-      <div class="checkout" id="checkoutBox" hidden>
-        <label class="wallet-row" id="walletRow" hidden>
-          <span>👛 Use wallet credit (<b id="walletAvail">₹0</b>)</span>
-          <input type="checkbox" id="useWallet" />
-        </label>
-        <input id="ckAddress" placeholder="Delivery address (house, street, area)" />
-        <div class="pay-modes">
-          <label class="pay-opt"><input type="radio" name="pay" value="cod" checked /> 💵 Cash on delivery</label>
-          <label class="pay-opt"><input type="radio" name="pay" value="upi" /> 📲 UPI</label>
-        </div>
-        <div class="cart-total"><span>Total</span><span id="cartTotal">₹0</span></div>
-        <button class="btn-primary" id="placeOrder">Place order</button>
+    <!-- LISTING (products in a category) -->
+    <main class="screen" id="screen-listing">
+      <div class="listing-head">
+        <button class="back-btn" data-back="categories">‹</button>
+        <h2 id="listingTitle">Products</h2>
       </div>
+      <div class="chip-row" id="listingChips"></div>
+      <div class="prod-list" id="listingList"></div>
+    </main>
+
+    <!-- SEARCH RESULTS -->
+    <main class="screen" id="screen-search">
+      <div class="listing-head">
+        <button class="back-btn" data-back="home">‹</button>
+        <h2 id="searchTitle">Search</h2>
+      </div>
+      <div class="prod-list" id="searchList"></div>
+    </main>
+
+    <!-- CART / BASKET -->
+    <main class="screen" id="screen-cart">
+      <div class="screen-head"><h2>My basket</h2></div>
+      <div id="cartItems"></div>
+      <div class="basket-foot" id="basketFoot" hidden>
+        <div class="saving-banner" id="savingBanner" hidden></div>
+        <div class="sum-row"><span>Item total</span><span id="basketItemTotal">₹0</span></div>
+        <div class="sum-row"><span>Delivery</span><span class="free-txt">FREE</span></div>
+        <div class="sum-row total"><span>Total</span><span id="basketTotal">₹0</span></div>
+        <button class="btn-lime" id="toCheckout">Proceed to checkout →</button>
+      </div>
+    </main>
+
+    <!-- CHECKOUT -->
+    <main class="screen" id="screen-checkout">
+      <div class="listing-head">
+        <button class="back-btn" data-back="cart">‹</button>
+        <h2>Checkout</h2>
+      </div>
+
+      <div class="co-card">
+        <div class="co-card-head"><span>📍 Delivery address</span></div>
+        <input id="ckName" placeholder="Your name" />
+        <textarea id="ckAddress" rows="2" placeholder="House / flat, street, area, city – pincode"></textarea>
+      </div>
+
+      <div class="co-card">
+        <div class="co-card-head"><span>🚚 Delivery slot</span></div>
+        <div class="slot-row" id="slotRow">
+          <button class="slot active" data-slot="Express · in minutes">Express<span>in minutes</span></button>
+          <button class="slot" data-slot="Standard · same day">Standard<span>same day</span></button>
+        </div>
+      </div>
+
+      <div class="co-card">
+        <div class="co-card-head"><span>💳 Payment method</span></div>
+        <label class="pay-opt active" id="payOptUpi"><input type="radio" name="pay" value="upi" checked /><span class="pay-ico">📲</span><span class="pay-name">UPI<small>Pay using any UPI app</small></span><span class="pay-tick">●</span></label>
+        <label class="pay-opt" id="payOptCod"><input type="radio" name="pay" value="cod" /><span class="pay-ico">💵</span><span class="pay-name">Cash on delivery<small>Pay when it arrives</small></span><span class="pay-tick">●</span></label>
+        <label class="pay-opt disabled"><span class="pay-ico">💳</span><span class="pay-name">Credit / debit card<small>Coming soon</small></span></label>
+      </div>
+
+      <label class="wallet-toggle" id="walletRow" hidden>
+        <span>👛 Use wallet credit (<b id="walletAvail">₹0</b>)</span>
+        <input type="checkbox" id="useWallet" />
+      </label>
+
+      <div class="co-card summary">
+        <div class="sum-row"><span>Item total</span><span id="sumItemTotal">₹0</span></div>
+        <div class="sum-row"><span>Delivery</span><span class="free-txt">FREE</span></div>
+        <div class="sum-row" id="sumWalletRow" hidden><span>Wallet credit</span><span id="sumWallet">−₹0</span></div>
+        <div class="sum-row total"><span>To pay</span><span id="sumTotal">₹0</span></div>
+      </div>
+
+      <button class="btn-lime place" id="placeOrder">Place order →</button>
+      <p class="safe-note">🔒 Your order is 100% safe and secure</p>
     </main>
 
     <!-- ORDERS -->
     <main class="screen" id="screen-orders">
-      <h2 class="screen-title">📦 My orders</h2>
+      <div class="screen-head"><h2>My orders</h2></div>
       <div id="orderList"></div>
     </main>
 
     <!-- BOTTOM NAV -->
     <nav class="bottom-nav">
-      <button class="nav-btn active" data-screen="home"><span>🏠</span>Home</button>
-      <button class="nav-btn" data-screen="shop"><span>🛍️</span>Shop</button>
-      <button class="nav-btn" data-screen="cart"><span>🧺</span>Cart<span class="nav-badge" id="cartBadge" hidden>0</span></button>
-      <button class="nav-btn" data-screen="orders"><span>📦</span>Orders</button>
+      <button class="nav-btn active" data-screen="home"><span class="ni">🏠</span>Home</button>
+      <button class="nav-btn" data-screen="categories"><span class="ni">🗂️</span>Categories</button>
+      <button class="nav-btn" data-screen="cart"><span class="ni">🧺</span>Basket<span class="nav-badge" id="cartBadge" hidden>0</span></button>
+      <button class="nav-btn" data-screen="orders"><span class="ni">📦</span>Orders</button>
     </nav>
+  </div>
+
+  <!-- PRODUCT DETAIL -->
+  <div class="detail" id="detail" hidden>
+    <div class="detail-card" id="detailCard"></div>
+  </div>
+
+  <!-- ADDRESS MODAL -->
+  <div class="modal" id="addrModal" hidden>
+    <div class="modal-card">
+      <h3>Delivery address</h3>
+      <input id="addrName" placeholder="Your name" />
+      <textarea id="addrInput" rows="3" placeholder="House / flat, street, area, city – pincode"></textarea>
+      <div class="modal-btns">
+        <button class="btn-ghost" id="addrCancel">Cancel</button>
+        <button class="btn-lime" id="addrSave">Save address</button>
+      </div>
+    </div>
   </div>
 
   <!-- ORDER CONFIRMATION -->

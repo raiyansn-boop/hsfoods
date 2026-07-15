@@ -1,13 +1,13 @@
 {
-  "name": "HSFOODS — Fresh Fruits",
+  "name": "HSFOODS — Fresh groceries",
   "short_name": "HSFOODS",
-  "description": "Order fresh fruits & groceries, delivered in minutes",
+  "description": "Order fresh fruits & groceries, delivered fast. Pay by UPI or cash and earn cashback.",
   "start_url": "/shop.html?app=1",
   "scope": "/shop",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#F3FBF6",
-  "theme_color": "#1B8B4B",
+  "background_color": "#0B0F0E",
+  "theme_color": "#0B0F0E",
   "icons": [
     { "src": "/icons/shop-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "/icons/shop-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
