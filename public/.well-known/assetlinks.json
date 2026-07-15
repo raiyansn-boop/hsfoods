@@ -1,8 +1,18 @@
-[{
-  "relation": ["delegate_permission/common.handle_all_urls"],
-  "target": {
-    "namespace": "android_app",
-    "package_name": "com.onrender.hsfoods.twa",
-    "sha256_cert_fingerprints": ["2B:E8:27:FE:D8:5F:39:D7:9A:77:D9:C1:5A:A1:11:E6:23:74:19:F3:DD:F2:D3:A5:A2:BA:BD:06:09:EF:D6:63"]
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.onrender.hsfoods.twa",
+      "sha256_cert_fingerprints": ["2B:E8:27:FE:D8:5F:39:D7:9A:77:D9:C1:5A:A1:11:E6:23:74:19:F3:DD:F2:D3:A5:A2:BA:BD:06:09:EF:D6:63"]
+    }
+  },
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.onrender.hsfoods.manager",
+      "sha256_cert_fingerprints": ["7A:F2:70:25:41:1A:77:B5:3C:0F:B4:3D:11:95:F7:AF:1E:64:86:65:3E:88:F7:52:36:FB:03:1F:DC:61:1F:E7"]
+    }
   }
-}]
+]
