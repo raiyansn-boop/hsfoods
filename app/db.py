@@ -153,6 +153,14 @@ def init_db() -> None:
                 created_at     TEXT NOT NULL,
                 approved_at    TEXT
             );
+
+            CREATE TABLE IF NOT EXISTS otps (
+                phone      TEXT PRIMARY KEY,
+                code       TEXT NOT NULL,
+                expires_at TEXT NOT NULL,
+                attempts   INTEGER NOT NULL DEFAULT 0,
+                created_at TEXT NOT NULL
+            );
             """
         )
 
@@ -237,6 +245,54 @@ def render_template(body: str, name: str | None = None, phone: str | None = None
             .replace("{name}", name or "there")
             .replace("{phone}", phone or "")
             .replace("{store}", "HSFOODS"))
+
+
+# ---- OTP login (customer phone verification) -------------------------------
+OTP_TTL_SECONDS = 300           # a code is valid for 5 minutes
+OTP_RESEND_COOLDOWN = 30        # seconds a user must wait before requesting again
+OTP_MAX_ATTEMPTS = 5            # wrong tries before the code is burned
+
+
+def create_otp(conn, phone: str):
+    """Create (or replace) a 6-digit OTP for a phone.
+
+    Returns ``(code, 0)`` on success, or ``(None, seconds_left)`` if the caller
+    is still within the resend cooldown.
+    """
+    now = datetime.now(timezone.utc)
+    row = conn.execute("SELECT created_at FROM otps WHERE phone = ?", (phone,)).fetchone()
+    if row:
+        elapsed = (now - datetime.fromisoformat(row["created_at"])).total_seconds()
+        if elapsed < OTP_RESEND_COOLDOWN:
+            return None, int(OTP_RESEND_COOLDOWN - elapsed) or 1
+    code = f"{secrets.randbelow(1000000):06d}"
+    conn.execute(
+        "INSERT INTO otps (phone, code, expires_at, attempts, created_at) VALUES (?, ?, ?, 0, ?) "
+        "ON CONFLICT(phone) DO UPDATE SET code = excluded.code, "
+        "expires_at = excluded.expires_at, attempts = 0, created_at = excluded.created_at",
+        (phone, code, (now + timedelta(seconds=OTP_TTL_SECONDS)).isoformat(), now.isoformat()),
+    )
+    conn.commit()
+    return code, 0
+
+
+def verify_otp(conn, phone: str, code: str):
+    """Check a submitted code. Returns ``(ok: bool, reason: str)`` and consumes
+    the code on success (or when it becomes unusable)."""
+    row = conn.execute("SELECT * FROM otps WHERE phone = ?", (phone,)).fetchone()
+    if not row:
+        return False, "no_code"
+    if datetime.fromisoformat(row["expires_at"]) < datetime.now(timezone.utc):
+        conn.execute("DELETE FROM otps WHERE phone = ?", (phone,)); conn.commit()
+        return False, "expired"
+    if row["attempts"] >= OTP_MAX_ATTEMPTS:
+        conn.execute("DELETE FROM otps WHERE phone = ?", (phone,)); conn.commit()
+        return False, "too_many"
+    if (code or "").strip() != row["code"]:
+        conn.execute("UPDATE otps SET attempts = attempts + 1 WHERE phone = ?", (phone,)); conn.commit()
+        return False, "mismatch"
+    conn.execute("DELETE FROM otps WHERE phone = ?", (phone,)); conn.commit()
+    return True, "ok"
 
 
 def get_setting(conn, key: str, default: str = "") -> str:

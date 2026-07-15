@@ -32,22 +32,63 @@ function toast(msg) {
   clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 1800);
 }
 
-// --- onboarding --------------------------------------------------------------
-function startShopping() {
+// --- onboarding (OTP login) --------------------------------------------------
+let pendingPhone = '';
+function showLoginStep(n) {
+  $('#loginStep1').hidden = n !== 1;
+  $('#loginStep2').hidden = n !== 2;
+}
+async function sendOtp() {
   const phone = ($('#obPhone').value || '').replace(/\D/g, '');
   if (phone.length < 8) { toast('Enter a valid number'); return; }
-  LS.set('hs_phone', phone);
   const nameEl = $('#obName'); if (nameEl && nameEl.value.trim()) LS.set('hs_name', nameEl.value.trim());
   const refEl = $('#obRef'); if (refEl && refEl.value.trim()) LS.set('hs_ref', refEl.value.trim());
-  boot();
+  const btn = $('#obSendOtp'); const label = btn.textContent;
+  btn.disabled = true; btn.textContent = 'Sending…';
+  try {
+    const r = await api('/shop/auth/send-otp', { method: 'POST', body: JSON.stringify({ phone }) });
+    pendingPhone = phone;
+    $('#otpPhoneLabel').textContent = '+' + phone;
+    $('#obOtp').value = '';
+    const dev = $('#otpDev');
+    if (r.devMode && r.devCode) {
+      dev.hidden = false;
+      dev.innerHTML = "Demo mode — WhatsApp messaging isn't set up yet.<br>Your code is <b>" + esc(r.devCode) + '</b>';
+      $('#obOtp').value = r.devCode;   // prefill so testing is one tap
+    } else { dev.hidden = true; }
+    showLoginStep(2);
+    setTimeout(() => $('#obOtp').focus(), 60);
+  } catch (e) {
+    toast('⚠️ ' + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = label;
+  }
 }
-$('#obStart').addEventListener('click', () => {
-  try { startShopping(); } catch (e) { toast('Could not start — ' + (e && e.message ? e.message : e)); }
-});
+async function verifyOtp() {
+  const code = ($('#obOtp').value || '').replace(/\D/g, '');
+  if (code.length < 4) { toast('Enter the code'); return; }
+  const btn = $('#obVerify'); const label = btn.textContent;
+  btn.disabled = true; btn.textContent = 'Verifying…';
+  try {
+    await api('/shop/auth/verify-otp', { method: 'POST', body: JSON.stringify({ phone: pendingPhone, code }) });
+    LS.set('hs_phone', pendingPhone);
+    LS.set('hs_verified', '1');
+    boot();
+  } catch (e) {
+    toast('⚠️ ' + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = label;
+  }
+}
+$('#obSendOtp').addEventListener('click', () => { try { sendOtp(); } catch (e) { toast(String(e)); } });
+$('#obVerify').addEventListener('click', () => { try { verifyOtp(); } catch (e) { toast(String(e)); } });
+$('#otpResend').addEventListener('click', () => sendOtp());
+$('#otpChange').addEventListener('click', () => { showLoginStep(1); $('#obPhone').focus(); });
 ['#obPhone', '#obName', '#obRef'].forEach((sel) => {
   const el = $(sel);
-  if (el) el.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') { ev.preventDefault(); $('#obStart').click(); } });
+  if (el) el.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') { ev.preventDefault(); sendOtp(); } });
 });
+$('#obOtp').addEventListener('keydown', (ev) => { if (ev.key === 'Enter') { ev.preventDefault(); verifyOtp(); } });
 
 async function boot() {
   if (!store.phone) { $('#onboard').hidden = false; $('#app').hidden = true; return; }

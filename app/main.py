@@ -8,7 +8,7 @@ from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 from . import db
-from .routers import (assistant, broadcast, categories, chats, customers, orders,
+from .routers import (assistant, auth, broadcast, categories, chats, customers, orders,
                       products, referrals, reports, settings, shop, templates, whatsapp)
 
 PUBLIC_DIR = Path(__file__).resolve().parent.parent / "public"
@@ -53,6 +53,7 @@ app.include_router(reports.router)
 app.include_router(settings.router)
 app.include_router(templates.router)
 app.include_router(shop.router)
+app.include_router(auth.router)
 app.include_router(referrals.router)
 app.include_router(assistant.router)
 app.include_router(broadcast.router)

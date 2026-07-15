@@ -19,11 +19,27 @@
     <div class="onboard-card">
       <div class="onboard-logo">HS<span>FOODS</span></div>
       <p class="onboard-tag">Fresh groceries, delivered fast ⚡</p>
-      <input id="obPhone" type="tel" inputmode="numeric" placeholder="Your WhatsApp number" />
-      <input id="obName" type="text" placeholder="Your name (optional)" />
-      <input id="obRef" type="text" placeholder="Referral code (optional)" />
-      <button class="btn-lime" id="obStart">Start shopping →</button>
-      <p class="onboard-fine">No password needed. We use your number to save your cart, wallet &amp; orders.</p>
+
+      <!-- STEP 1 · phone -->
+      <div id="loginStep1">
+        <input id="obPhone" type="tel" inputmode="numeric" placeholder="Your WhatsApp number" />
+        <input id="obName" type="text" placeholder="Your name (optional)" />
+        <input id="obRef" type="text" placeholder="Referral code (optional)" />
+        <button class="btn-lime" id="obSendOtp">Send code →</button>
+        <p class="onboard-fine">We'll send a 6-digit code to your WhatsApp to log you in. No password needed.</p>
+      </div>
+
+      <!-- STEP 2 · verify -->
+      <div id="loginStep2" hidden>
+        <p class="otp-to">Enter the code sent to<br><b id="otpPhoneLabel"></b></p>
+        <input id="obOtp" type="tel" inputmode="numeric" maxlength="6" placeholder="6-digit code" class="otp-input" />
+        <div class="otp-dev" id="otpDev" hidden></div>
+        <button class="btn-lime" id="obVerify">Verify &amp; start shopping →</button>
+        <div class="otp-links">
+          <button class="otp-link" id="otpResend">Resend code</button>
+          <button class="otp-link" id="otpChange">Change number</button>
+        </div>
+      </div>
     </div>
   </div>
 
