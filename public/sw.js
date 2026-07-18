@@ -2,7 +2,7 @@
 // Always serves fresh content when online (no stale-cache trap), falls back to
 // cache only when offline. Having a fetch handler makes both apps installable
 // as Android/desktop apps.
-const CACHE = 'hsfoods-v10';
+const CACHE = 'hsfoods-v11';
 const SHELL = [
   '/', '/index.html', '/styles.css', '/app.js',
   '/shop.html', '/shop.css', '/shop.js',

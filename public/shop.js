@@ -22,7 +22,7 @@ const store = {
 };
 let PRODUCTS = [];
 let CATS = [];
-let CTX = { wallet: 0, address: '' };
+let CTX = { wallet: 0, walletPending: 0, address: '', name: '', referralCode: '' };
 let activeCat = null;
 let lastQuery = '';
 let detailId = null;
@@ -70,7 +70,10 @@ async function verifyOtp() {
   const btn = $('#obVerify'); const label = btn.textContent;
   btn.disabled = true; btn.textContent = 'Verifying…';
   try {
-    await api('/shop/auth/verify-otp', { method: 'POST', body: JSON.stringify({ phone: pendingPhone, code }) });
+    await api('/shop/auth/verify-otp', {
+      method: 'POST',
+      body: JSON.stringify({ phone: pendingPhone, code, name: LS.get('hs_name') || '', referralCode: LS.get('hs_ref') || null }),
+    });
     LS.set('hs_phone', pendingPhone);
     LS.set('hs_verified', '1');
     boot();
@@ -101,8 +104,7 @@ async function boot() {
     ]);
     PRODUCTS = menu.products || [];
     CATS = menu.categories || [];
-    CTX.wallet = ctx.wallet || 0;
-    CTX.address = ctx.address || LS.get('hs_addr') || '';
+    setContext(ctx);
     activeCat = CATS[0] || null;
     updateDeliverAddr();
     renderHome();
@@ -112,6 +114,16 @@ async function boot() {
   } finally {
     if (loader) loader.hidden = true;
   }
+}
+
+function setContext(ctx) {
+  ctx = ctx || {};
+  CTX.wallet = ctx.wallet || 0;
+  CTX.walletPending = ctx.walletPending || 0;
+  CTX.address = ctx.address || LS.get('hs_addr') || '';
+  CTX.name = ctx.name || store.name || '';
+  CTX.referralCode = ctx.referralCode || '';
+  updateDeliverAddr();
 }
 
 // --- product data helpers ----------------------------------------------------
@@ -324,10 +336,8 @@ $('#placeOrder').addEventListener('click', async () => {
   const lines = cartLines();
   if (!lines.length) { toast('Your basket is empty'); showScreen('cart'); return; }
   const name = $('#ckName').value.trim();
-  let address = $('#ckAddress').value.trim();
+  const address = $('#ckAddress').value.trim();
   if (address.length < 5) { toast('Please enter your delivery address'); $('#ckAddress').focus(); return; }
-  const slot = $('#slotRow').querySelector('.slot.active')?.dataset.slot;
-  if (slot) address += ' • ' + slot;
   const payment = document.querySelector('input[name="pay"]:checked').value;
   const btn = $('#placeOrder');
   btn.disabled = true; btn.textContent = 'Placing…';
@@ -349,6 +359,7 @@ $('#placeOrder').addEventListener('click', async () => {
     LS.remove('hs_ref');
     const ctx = await api('/shop/context?phone=' + encodeURIComponent(store.phone)).catch(() => ({}));
     CTX.wallet = ctx.wallet || 0;
+    CTX.walletPending = ctx.walletPending || 0;
     renderCart();
     showConfirm(r);
   } catch (e) {
@@ -390,6 +401,37 @@ async function renderOrders() {
     list.innerHTML = '<div class="cart-empty">⚠️ Could not load orders.<br>' + esc(e.message) + '</div>';
   }
 }
+
+// --- profile / account -------------------------------------------------------
+async function renderProfile() {
+  const nm = (CTX.name || store.name || '').trim();
+  $('#pfName').textContent = nm || 'Guest';
+  $('#pfPhone').textContent = store.phone ? '+' + store.phone : '—';
+  $('#pfAvatar').textContent = nm ? nm[0].toUpperCase() : '👤';
+  $('#pfWallet').textContent = rupee(CTX.wallet);
+  $('#pfPending').textContent = rupee(CTX.walletPending);
+  const refCard = $('#pfReferralCard');
+  if (CTX.referralCode) { refCard.hidden = false; $('#pfRefCode').textContent = CTX.referralCode; }
+  else refCard.hidden = true;
+  try {
+    const o = await api('/shop/orders?phone=' + encodeURIComponent(store.phone));
+    $('#pfOrders').textContent = o.length;
+  } catch { $('#pfOrders').textContent = '—'; }
+}
+
+$('#pfEdit').addEventListener('click', () => $('#deliverRow').click());
+$('#pfAddress').addEventListener('click', () => $('#deliverRow').click());
+$('#pfShare').addEventListener('click', async () => {
+  const code = CTX.referralCode;
+  if (!code) return;
+  const msg = `Order fresh groceries on HSFOODS! 🍃 Use my code ${code} and we both earn cashback.\n${location.origin}/shop.html`;
+  if (navigator.share) { try { await navigator.share({ title: 'HSFOODS', text: msg }); } catch {} }
+  else { try { await navigator.clipboard.writeText(msg); toast('Referral copied ✓'); } catch { toast('Your code: ' + code); } }
+});
+$('#pfLogout').addEventListener('click', () => {
+  ['hs_phone', 'hs_verified', 'hs_name', 'hs_ref', 'hs_addr', 'hs_cart'].forEach((k) => LS.remove(k));
+  location.reload();
+});
 
 // --- product detail ----------------------------------------------------------
 function openDetail(id) {
@@ -437,15 +479,16 @@ $('#addrSave').addEventListener('click', () => {
   const nm = $('#addrName').value.trim();
   if (addr.length < 5) { toast('Please enter a valid address'); return; }
   CTX.address = addr; LS.set('hs_addr', addr);
-  if (nm) LS.set('hs_name', nm);
+  if (nm) { LS.set('hs_name', nm); CTX.name = nm; }
   $('#ckAddress').value = addr; $('#ckName').value = nm || store.name || '';
   updateDeliverAddr();
   $('#addrModal').hidden = true;
-  toast('Address saved ✓');
+  toast('Saved ✓');
+  if ($('#screen-profile').classList.contains('active')) renderProfile();
 });
 
 // --- navigation --------------------------------------------------------------
-const NAV_FOR = { home: 'home', categories: 'categories', cart: 'cart', orders: 'orders', listing: 'categories', search: 'home', checkout: 'cart' };
+const NAV_FOR = { home: 'home', categories: 'categories', cart: 'cart', orders: 'orders', profile: 'profile', listing: 'categories', search: 'home', checkout: 'cart' };
 function showScreen(name) {
   document.querySelectorAll('.screen').forEach((s) => s.classList.toggle('active', s.id === 'screen-' + name));
   const tab = NAV_FOR[name] || name;
@@ -455,6 +498,7 @@ function showScreen(name) {
   if (name === 'cart') renderCart();
   if (name === 'checkout') renderCheckout();
   if (name === 'orders') renderOrders();
+  if (name === 'profile') renderProfile();
   window.scrollTo(0, 0);
 }
 document.querySelectorAll('[data-screen]').forEach((b) => b.addEventListener('click', () => showScreen(b.dataset.screen)));

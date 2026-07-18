@@ -20,6 +20,8 @@ class PhoneIn(BaseModel):
 class VerifyIn(BaseModel):
     phone: str
     code: str
+    name: str | None = None
+    referralCode: str | None = None
 
 
 def _clean_phone(raw: str) -> str:
@@ -81,14 +83,23 @@ def verify_otp(body: VerifyIn):
     conn = db.get_conn()
     try:
         ok, reason = db.verify_otp(conn, phone, body.code)
+        if not ok:
+            msg = {
+                "expired": "Code expired — request a new one",
+                "too_many": "Too many attempts — request a new code",
+                "no_code": "No active code — request one first",
+                "mismatch": "Incorrect code — try again",
+            }.get(reason, "Verification failed")
+            raise HTTPException(status_code=400, detail=msg)
+        # sign-up: create the account on first verified login so the customer
+        # gets a referral code + wallet immediately (and referral attribution).
+        cust = db.get_or_create_customer(conn, phone, (body.name or "").strip() or None, body.referralCode)
+        w = db.wallet_summary(conn, cust["id"])
+        conn.commit()
+        return {"verified": True, "context": {
+            "name": cust["name"], "address": cust["address"],
+            "referralCode": cust["referral_code"],
+            "wallet": w["balance"], "walletPending": w["pending"],
+        }}
     finally:
         conn.close()
-    if not ok:
-        msg = {
-            "expired": "Code expired — request a new one",
-            "too_many": "Too many attempts — request a new code",
-            "no_code": "No active code — request one first",
-            "mismatch": "Incorrect code — try again",
-        }.get(reason, "Verification failed")
-        raise HTTPException(status_code=400, detail=msg)
-    return {"verified": True}

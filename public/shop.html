@@ -192,12 +192,47 @@
       <div id="orderList"></div>
     </main>
 
+    <!-- ACCOUNT / PROFILE -->
+    <main class="screen" id="screen-profile">
+      <div class="screen-head"><h2>My account</h2></div>
+
+      <div class="profile-card">
+        <div class="pf-avatar" id="pfAvatar">👤</div>
+        <div class="pf-id">
+          <div class="pf-name" id="pfName">Guest</div>
+          <div class="pf-phone" id="pfPhone">—</div>
+        </div>
+        <button class="pf-edit" id="pfEdit">Edit</button>
+      </div>
+
+      <div class="pf-stats">
+        <div class="pf-stat"><div class="pf-stat-val" id="pfWallet">₹0</div><div class="pf-stat-lbl">Wallet</div></div>
+        <div class="pf-stat"><div class="pf-stat-val" id="pfPending">₹0</div><div class="pf-stat-lbl">Pending cashback</div></div>
+        <div class="pf-stat"><div class="pf-stat-val" id="pfOrders">0</div><div class="pf-stat-lbl">Orders</div></div>
+      </div>
+
+      <div class="pf-referral" id="pfReferralCard" hidden>
+        <div class="pf-ref-head">🎁 Refer &amp; earn</div>
+        <div class="pf-ref-sub">Share your code — earn wallet cashback when friends order.</div>
+        <div class="pf-ref-row"><span class="pf-ref-code" id="pfRefCode">—</span><button class="pf-ref-share" id="pfShare">Share</button></div>
+      </div>
+
+      <div class="pf-menu">
+        <button class="pf-item" data-screen="orders"><span class="pf-ico">📦</span>My orders<span class="pf-arrow">›</span></button>
+        <button class="pf-item" id="pfAddress"><span class="pf-ico">📍</span>Delivery address<span class="pf-arrow">›</span></button>
+        <a class="pf-item" href="/privacy.html"><span class="pf-ico">🔒</span>Privacy policy<span class="pf-arrow">›</span></a>
+        <button class="pf-item pf-logout" id="pfLogout"><span class="pf-ico">🚪</span>Log out</button>
+      </div>
+      <p class="pf-version">🍃 HSFOODS · v1.0</p>
+    </main>
+
     <!-- BOTTOM NAV -->
     <nav class="bottom-nav">
       <button class="nav-btn active" data-screen="home"><span class="ni">🏠</span>Home</button>
-      <button class="nav-btn" data-screen="categories"><span class="ni">🗂️</span>Categories</button>
+      <button class="nav-btn" data-screen="categories"><span class="ni">🗂️</span>Shop</button>
       <button class="nav-btn" data-screen="cart"><span class="ni">🧺</span>Basket<span class="nav-badge" id="cartBadge" hidden>0</span></button>
       <button class="nav-btn" data-screen="orders"><span class="ni">📦</span>Orders</button>
+      <button class="nav-btn" data-screen="profile"><span class="ni">👤</span>Account</button>
     </nav>
   </div>
 
