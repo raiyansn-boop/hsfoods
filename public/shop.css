@@ -101,6 +101,7 @@ img{max-width:100%}
 .di-card span{font-size:11px;color:var(--muted)}
 .home-footer{text-align:center;color:var(--muted);font-size:12px;padding:30px 10px 10px;line-height:1.6}
 .home-footer b{color:#D6DEDA}
+.footer-link{display:inline-block;margin-top:8px;color:var(--lime);font-weight:700;text-decoration:none}
 
 /* ── PRODUCT CARDS ──────────────────────────────────────────── */
 /* row card (listings, popular, search) */
