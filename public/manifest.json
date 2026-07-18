@@ -10,6 +10,8 @@
   "theme_color": "#0A1628",
   "icons": [
     { "src": "/icons/mgmt-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/icons/mgmt-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    { "src": "/icons/mgmt-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/mgmt-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icons/mgmt-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
